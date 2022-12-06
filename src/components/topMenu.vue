@@ -31,20 +31,34 @@
 
     <div>
       <b-modal
+        v-model="alertModal"
+        title="Atenção"
+        ok-only
+        header-bg-variant="dark"
+        header-text-variant="light"
+        centered
+      >
+        <p class="my-2">Clique no link de verificação enviado por e-mail para ativar a sua whitelist.</p>
+      </b-modal>
+
+      <b-modal
         v-model="modalShow"
         id="modal-prevent-closing"
         centered
         title="Liberação de White List"
         ok-title="Enviar"
         hide-footer
+        header-bg-variant="dark"
+        header-text-variant="light"
+        no-stacking
       >
         <div>
           <b-form ref="form">
             <b-form-group
               id="input-group-1"
-              label="E-mail:"
+              label="E-mail:*"
               label-for="input-1"
-              description="Nunca compartilharemos seu e-mail."
+              description="ATENÇÃO: Enviaremos um e-mail de confirmação."
             >
               <b-form-input
                 id="input-1"
@@ -60,7 +74,7 @@
 
             <b-form-group
               id="input-group-2"
-              label="Seu Nome Real:"
+              label="Seu Nome Real:*"
               label-for="input-2"
             >
               <b-form-input
@@ -74,8 +88,23 @@
               ></b-form-input>
             </b-form-group>
             <b-form-group
+              id="input-group-whatsappNumber"
+              label="Whatsapp:"
+              label-for="input-whatsappNumber"
+            >
+              <b-form-input
+                id="input-whatsappNumber"
+                v-model="form.whatsappNumber"
+                placeholder="Numero do Whatsapp para envio de descontos"
+                v-bind:class="{
+                  'is-valid': whatsappNumberIsValid,
+                  'is-invalid': whatsappNumberIsInvalid,
+                }"
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group
               id="input-group-3"
-              label="Nome do Personagem:"
+              label="Nome do Personagem:*"
               label-for="input-3"
               invalid-feedback="Nome do Personagem é obrigatorio"
             >
@@ -91,7 +120,7 @@
             </b-form-group>
             <b-form-group
               id="input-group-4"
-              label="Numero do passaporte(Whitelist):"
+              label="Numero do passaporte(Whitelist):*"
               label-for="input-4"
             >
               <b-form-input
@@ -131,7 +160,7 @@
                   'is-invalid': acceptTermsIsInvalid,
                 }"
               >
-                Aceito os termos e regras da cidade (disponivel no discord)
+                Aceito os termos e regras da cidade (disponivel no discord)*
               </b-form-checkbox>
               <b-form-checkbox
                 id="acceptNewsletters"
@@ -140,7 +169,7 @@
                 value="true"
                 unchecked-value="false"
               >
-                Aceito receber cupons/ofertas/novidades por e-mail
+                Aceito receber novidades por e-mail/Whatsapp
               </b-form-checkbox>
             </b-form-group>
           </b-form>
@@ -180,6 +209,7 @@ export default {
       form: {
         email: "",
         realName: "",
+        whatsappNumber: "",
         charName: "",
         whitelist: "",
         indicationWhitelist: "",
@@ -187,9 +217,26 @@ export default {
         acceptTerms: false,
       },
       modalShow: false,
+      alertModal: false,
       showAlert: false,
       errorMessage: "",
       submitStatus: null,
+
+      emailIsValid: null,
+      emailIsInvalid: null,
+      realNameIsValid: null,
+      realNameIsInvalid: null,
+      whatsappNumberIsValid: null,
+      whatsappNumberIsInvalid: null,
+      charNameIsValid: null,
+      charNameIsInvalid: null,
+      whitelistIsValid: null,
+      whitelistIsInvalid: null,
+      indicationWhitelistIsValid: null,
+      indicationWhitelistIsInvalid: null,
+      acceptTermsIsValid: null,
+      acceptTermsIsInvalid: null
+     
     };
   },
 
@@ -224,6 +271,25 @@ export default {
       this.realNameIsInvalid = false;
       this.realNameIsValid = true;
 
+      if (
+        this.form.whatsappNumber.length > 0 &&
+        !this.isNumber(this.form.whatsappNumber)
+      ) {
+        this.errorMessage += "Somente numeros é permitido";
+        this.showAlert = true;
+        this.whatsappNumberIsInvalid = true;
+        return false;
+      } else if (
+        this.form.whatsappNumber.length > 0 &&
+        this.isNumber(this.form.whatsappNumber)
+      ) {
+        this.whatsappNumberIsInvalid = false;
+        this.whatsappNumberIsValid = true;
+      } else if (this.form.whatsappNumber.length > 0) {
+        this.whatsappNumberIsInvalid = false;
+        this.whatsappNumberIsValid = false;
+      }
+
       if (this.form.charName === "") {
         this.errorMessage += "Nome do Personagem";
         this.showAlert = true;
@@ -242,7 +308,10 @@ export default {
       this.whitelistIsInvalid = false;
       this.whitelistIsValid = true;
 
-      if (this.form.whitelist.length > 0 && !this.isNumber(this.form.whitelist)) {
+      if (
+        this.form.whitelist.length > 0 &&
+        !this.isNumber(this.form.whitelist)
+      ) {
         this.errorMessage += "Somente numeros é permitido";
         this.showAlert = true;
         this.whitelistIsInvalid = true;
@@ -251,15 +320,24 @@ export default {
       this.whitelistIsInvalid = false;
       this.whitelistIsValid = true;
 
-
-      if (this.form.indicationWhitelist.length > 0 && !this.isNumber(this.form.indicationWhitelist)) {
+      if (
+        this.form.indicationWhitelist.length > 0 &&
+        !this.isNumber(this.form.indicationWhitelist)
+      ) {
         this.errorMessage += "Somente numeros é permitido";
         this.showAlert = true;
         this.indicationWhitelistIsInvalid = true;
         return false;
+      } else if (
+        this.form.indicationWhitelist.length > 0 &&
+        this.isNumber(this.form.indicationWhitelist)
+      ) {
+        this.indicationWhitelistIsInvalid = false;
+        this.indicationWhitelistIsValid = true;
+      } else if (this.form.indicationWhitelist.length === 0) {
+        this.indicationWhitelistIsInvalid = false;
+        this.indicationWhitelistIsValid = false;
       }
-      this.indicationWhitelistIsInvalid = false;
-      this.indicationWhitelistIsValid = true;
 
       if (this.form.acceptTerms === false) {
         this.errorMessage += "Você precisa aceitar os termos";
@@ -272,14 +350,29 @@ export default {
 
       return true;
     },
-    resetModal() {
+    resetForm() {
       this.form.email = "";
       this.form.realName = "";
+      this.form.whatsappNumber = "";
       this.form.charName = "";
       this.form.whitelist = "";
       this.form.indicationWhitelist = "";
       this.form.acceptTerms = false;
       this.form.acceptNewsletters = false;
+      this.emailIsValid= null;
+      this.emailIsInvalid= null;
+      this.realNameIsValid= null;
+      this.realNameIsInvalid= null;
+      this.whatsappNumberIsValid= null;
+      this.whatsappNumberIsInvalid= null;
+      this.charNameIsValid= null;
+      this.charNameIsInvalid= null;
+      this.whitelistIsValid= null;
+      this.whitelistIsInvalid= null;
+      this.indicationWhitelistIsValid= null;
+      this.indicationWhitelistIsInvalid= null;
+      this.acceptTermsIsValid= null;
+      this.acceptTermsIsInvalid= null;
 
       //   this.emailState = null;
       //   this.realNameState = null;
@@ -288,23 +381,30 @@ export default {
       //   this.acceptTermsState = null;
     },
     formSubmit() {
+      //verificar se a wl existe na tabela e verificar se realmente não esta liberado
+      //se ja estiver liberado enviar uma mensagem de erro
+      //se nao estiver, salvar os campos preenchidos e enviar um link para o email que foi digitado
+      //ao clicar no link de confirmação enviado por e-mail, a wl sera desbloqueada
+
       if (!this.checkFormValidity()) {
         return;
       }
-      this.$http
-        .post("https://localhost:3333/wlControler", this.form)
-        .then(() => {
-          //carregando
-          console.log(this.form);
+      //   this.$http
+      //     .post("https://localhost:3333/wlControler", this.form)
+      //     .then(() => {
+      //       //carregando
+      //       console.log(this.form);
 
-          // Hide the modal manually
-          this.$nextTick(() => {
-            this.$bvModal.hide("modal-prevent-closing");
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      //       // Hide the modal manually
+      //       this.$nextTick(() => {
+      //         this.$bvModal.hide("modal-prevent-closing");
+      //       });
+      //     })
+      //     .catch((error) => {
+      //       console.log(error);
+      //     });
+      this.alertModal = true
+      this.resetForm()
     },
     validateEmail(email) {
       var re = /\S+@\S+\.\S+/;
@@ -327,9 +427,7 @@ export default {
   font-family: phoenix;
   font-size: 4vh;
 }
-#nav-collapse {
-  /* justify-content: space-between; */
-}
+
 #footerModal {
   flex-direction: row-reverse;
 }
