@@ -6,11 +6,11 @@
     <b-collapse id="nav-collapse" is-nav>
       <b-navbar-nav>
         <b-nav-item href="#" v-b-modal.modal-prevent-closing
-          >White List</b-nav-item
+          >WHITE LIST</b-nav-item
         >
       </b-navbar-nav>
 
-      <b-navbar-nav>
+      <!-- <b-navbar-nav>
         <b-nav-item href="#" right>
           <b-icon icon="discord" font-scale="1"></b-icon>
         </b-nav-item>
@@ -18,43 +18,43 @@
           <b-icon icon="instagram" font-scale="1"></b-icon>
         </b-nav-item>
         <b-nav-item href="#" right>
-          <b-icon icon="instagram" font-scale="1"></b-icon>
+          <b-icon icon="facebook" font-scale="1"></b-icon>
         </b-nav-item>
         <b-nav-item href="#" right>
-          <b-icon icon="instagram" font-scale="1"></b-icon>
+          <b-icon icon="twitter" font-scale="1"></b-icon>
         </b-nav-item>
         <b-nav-item href="#" right>
-          <b-icon icon="instagram" font-scale="1"></b-icon>
+          <b-icon icon="twitch" font-scale="1"></b-icon>
         </b-nav-item>
-      </b-navbar-nav>
+      </b-navbar-nav> -->
     </b-collapse>
 
     <div>
       <b-modal
+        v-model="modalShow"
         id="modal-prevent-closing"
         centered
         title="Liberação de White List"
-        @show="resetModal"
-        @hidden="resetModal"
-        @ok="handleOk"
+        ok-title="Enviar"
+        hide-footer
       >
         <div>
-          <b-form ref="form" @submit.stop.prevent="handleSubmit">
+          <b-form ref="form">
             <b-form-group
               id="input-group-1"
               label="E-mail:"
               label-for="input-1"
               description="Nunca compartilharemos seu e-mail."
-              invalid-feedback="Email é obrigatorio"
-              :state="emailState"
             >
               <b-form-input
                 id="input-1"
                 v-model="form.email"
                 type="email"
                 placeholder="Digite seu e-mail"
-                :state="emailState"
-                required
+                v-bind:class="{
+                  'is-valid': emailIsValid,
+                  'is-invalid': emailIsInvalid,
+                }"
               ></b-form-input>
             </b-form-group>
 
@@ -62,15 +62,15 @@
               id="input-group-2"
               label="Seu Nome Real:"
               label-for="input-2"
-              invalid-feedback="Nome Real é obrigatorio"
-              :state="realNameState"
             >
               <b-form-input
                 id="input-2"
                 v-model="form.realName"
                 placeholder="Nome Completo"
-                :state="realNameState"
-                required
+                v-bind:class="{
+                  'is-valid': realNameIsValid,
+                  'is-invalid': realNameIsInvalid,
+                }"
               ></b-form-input>
             </b-form-group>
             <b-form-group
@@ -78,29 +78,30 @@
               label="Nome do Personagem:"
               label-for="input-3"
               invalid-feedback="Nome do Personagem é obrigatorio"
-              :state="charNameState"
             >
               <b-form-input
                 id="input-3"
                 v-model="form.charName"
                 placeholder="Nome Completo do personagem"
-                :state="charNameState"
-                required
+                v-bind:class="{
+                  'is-valid': charNameIsValid,
+                  'is-invalid': charNameIsInvalid,
+                }"
               ></b-form-input>
             </b-form-group>
             <b-form-group
               id="input-group-4"
               label="Numero do passaporte(Whitelist):"
               label-for="input-4"
-              invalid-feedback="Numero do passaporte é obrigatorio"
-              :state="whitelistState"
             >
               <b-form-input
                 id="input-4"
                 v-model="form.whitelist"
                 placeholder="Numero que apareceu quanto tentou entrar no cidade"
-                :state="whitelistState"
-                required
+                v-bind:class="{
+                  'is-valid': whitelistIsValid,
+                  'is-invalid': whitelistIsInvalid,
+                }"
               ></b-form-input>
             </b-form-group>
             <b-form-group
@@ -112,6 +113,10 @@
                 id="input-5"
                 v-model="form.indicationWhitelist"
                 placeholder="Se sim, digite o passaporte(whitelist) de quem indicou"
+                v-bind:class="{
+                  'is-valid': indicationWhitelistIsValid,
+                  'is-invalid': indicationWhitelistIsInvalid,
+                }"
               ></b-form-input>
             </b-form-group>
             <b-form-group>
@@ -121,9 +126,10 @@
                 name="acceptTerms"
                 value="true"
                 unchecked-value="false"
-                invalid-feedback=""
-                :state="acceptTermsState"
-                required
+                v-bind:class="{
+                  'is-valid': acceptTermsIsValid,
+                  'is-invalid': acceptTermsIsInvalid,
+                }"
               >
                 Aceito os termos e regras da cidade (disponivel no discord)
               </b-form-checkbox>
@@ -140,12 +146,28 @@
           </b-form>
         </div>
 
-        <template #modal-footer="{ cancel }">
-          <!-- Emulate built in modal footer ok and cancel button actions -->
-          <b-button variant="danger" @click="cancel()"
-            >Cancelar</b-button>
-          <b-button variant="success" @click="event.submit"> Enviar </b-button>
+        <template>
+          <b-row id="footerModal">
+            <b-button
+              variant="success"
+              @click="formSubmit()"
+              class="footerModal-button"
+            >
+              Enviar
+            </b-button>
+            <b-button
+              variant="danger"
+              @click="modalShow = false"
+              class="footerModal-button"
+              >Cancelar</b-button
+            >
+          </b-row>
         </template>
+        <b-alert v-model="showAlert" variant="danger" id="erroAlert"
+          >Verifique os sequites campos:<br /><strong>{{
+            errorMessage
+          }}</strong></b-alert
+        >
       </b-modal>
     </div>
   </b-navbar>
@@ -165,22 +187,90 @@ export default {
         acceptTerms: false,
       },
       modalShow: false,
-      emailState: null,
-      realNameState: null,
-      charNameState: null,
-      whitelistState: null,
-      acceptNewslettersState: null,
+      showAlert: false,
+      errorMessage: "",
+      submitStatus: null,
     };
   },
+
   methods: {
     checkFormValidity() {
-      const valid = this.$refs.form.checkValidity();
-      this.emailState = valid;
-      this.realNameState = valid;
-      this.charNameState = valid;
-      this.whitelistState = valid;
-      this.acceptTermssState = valid;
-      return valid;
+      this.errorMessage = "";
+      this.showAlert = false;
+
+      if (this.form.email === "") {
+        this.errorMessage += "E-mail";
+        this.showAlert = true;
+        this.emailIsInvalid = true;
+        return false;
+      }
+      this.emailIsInvalid = false;
+      this.emailIsValid = true;
+      if (!this.validateEmail(this.form.email)) {
+        this.errorMessage += "Formato invalido do E-mail";
+        this.showAlert = true;
+        this.emailIsInvalid = true;
+        return false;
+      }
+      this.emailIsInvalid = false;
+      this.emailIsValid = true;
+
+      if (this.form.realName === "") {
+        this.errorMessage += "Nome Real";
+        this.showAlert = true;
+        this.realNameIsInvalid = true;
+        return false;
+      }
+      this.realNameIsInvalid = false;
+      this.realNameIsValid = true;
+
+      if (this.form.charName === "") {
+        this.errorMessage += "Nome do Personagem";
+        this.showAlert = true;
+        this.charNameIsInvalid = true;
+        return false;
+      }
+      this.charNameIsInvalid = false;
+      this.charNameIsValid = true;
+
+      if (this.form.whitelist === "") {
+        this.errorMessage += "Numero do passaporte (Whitelist):";
+        this.showAlert = true;
+        this.whitelistIsInvalid = true;
+        return false;
+      }
+      this.whitelistIsInvalid = false;
+      this.whitelistIsValid = true;
+
+      if (this.form.whitelist.length > 0 && !this.isNumber(this.form.whitelist)) {
+        this.errorMessage += "Somente numeros é permitido";
+        this.showAlert = true;
+        this.whitelistIsInvalid = true;
+        return false;
+      }
+      this.whitelistIsInvalid = false;
+      this.whitelistIsValid = true;
+
+
+      if (this.form.indicationWhitelist.length > 0 && !this.isNumber(this.form.indicationWhitelist)) {
+        this.errorMessage += "Somente numeros é permitido";
+        this.showAlert = true;
+        this.indicationWhitelistIsInvalid = true;
+        return false;
+      }
+      this.indicationWhitelistIsInvalid = false;
+      this.indicationWhitelistIsValid = true;
+
+      if (this.form.acceptTerms === false) {
+        this.errorMessage += "Você precisa aceitar os termos";
+        this.showAlert = true;
+        this.acceptTermsIsInvalid = true;
+        return false;
+      }
+      this.acceptTermsIsInvalid = false;
+      this.acceptTermsIsValid = true;
+
+      return true;
     },
     resetModal() {
       this.form.email = "";
@@ -191,27 +281,19 @@ export default {
       this.form.acceptTerms = false;
       this.form.acceptNewsletters = false;
 
-      this.emailState = null;
-      this.realNameState = null;
-      this.charNameState = null;
-      this.whitelistState = null;
-      this.acceptTermsState = null;
+      //   this.emailState = null;
+      //   this.realNameState = null;
+      //   this.charNameState = null;
+      //   this.whitelistState = null;
+      //   this.acceptTermsState = null;
     },
-    handleOk(bvModalEvent) {
-      // Prevent modal from closing
-      bvModalEvent.preventDefault();
-      // Trigger submit handler
-      this.handleSubmit();
-    },
-    handleSubmit() {
-      // Exit when the form isn't valid
+    formSubmit() {
       if (!this.checkFormValidity()) {
         return;
       }
-
-      axios
+      this.$http
         .post("https://localhost:3333/wlControler", this.form)
-        .then((res) => {
+        .then(() => {
           //carregando
           console.log(this.form);
 
@@ -223,6 +305,13 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    validateEmail(email) {
+      var re = /\S+@\S+\.\S+/;
+      return re.test(email);
+    },
+    isNumber(value) {
+      return !isNaN(parseFloat(value)) && isFinite(value);
     },
   },
 };
@@ -239,6 +328,15 @@ export default {
   font-size: 4vh;
 }
 #nav-collapse {
-  justify-content: space-between;
+  /* justify-content: space-between; */
+}
+#footerModal {
+  flex-direction: row-reverse;
+}
+.footerModal-button {
+  margin-right: 1vh;
+}
+#erroAlert {
+  margin-top: 10px;
 }
 </style>
