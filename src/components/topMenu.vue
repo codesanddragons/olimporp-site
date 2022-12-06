@@ -103,22 +103,6 @@
               ></b-form-input>
             </b-form-group>
             <b-form-group
-              id="input-group-3"
-              label="Nome do Personagem:*"
-              label-for="input-3"
-              invalid-feedback="Nome do Personagem é obrigatorio"
-            >
-              <b-form-input
-                id="input-3"
-                v-model="form.charName"
-                placeholder="Nome Completo do personagem"
-                v-bind:class="{
-                  'is-valid': charNameIsValid,
-                  'is-invalid': charNameIsInvalid,
-                }"
-              ></b-form-input>
-            </b-form-group>
-            <b-form-group
               id="input-group-4"
               label="Numero do passaporte(Whitelist):*"
               label-for="input-4"
@@ -210,7 +194,7 @@ export default {
         email: "",
         realName: "",
         whatsappNumber: "",
-        charName: "",
+        
         whitelist: "",
         indicationWhitelist: "",
         acceptNewsletters: false,
@@ -228,8 +212,6 @@ export default {
       realNameIsInvalid: null,
       whatsappNumberIsValid: null,
       whatsappNumberIsInvalid: null,
-      charNameIsValid: null,
-      charNameIsInvalid: null,
       whitelistIsValid: null,
       whitelistIsInvalid: null,
       indicationWhitelistIsValid: null,
@@ -290,15 +272,6 @@ export default {
         this.whatsappNumberIsValid = false;
       }
 
-      if (this.form.charName === "") {
-        this.errorMessage += "Nome do Personagem";
-        this.showAlert = true;
-        this.charNameIsInvalid = true;
-        return false;
-      }
-      this.charNameIsInvalid = false;
-      this.charNameIsValid = true;
-
       if (this.form.whitelist === "") {
         this.errorMessage += "Numero do passaporte (Whitelist):";
         this.showAlert = true;
@@ -354,7 +327,6 @@ export default {
       this.form.email = "";
       this.form.realName = "";
       this.form.whatsappNumber = "";
-      this.form.charName = "";
       this.form.whitelist = "";
       this.form.indicationWhitelist = "";
       this.form.acceptTerms = false;
@@ -365,8 +337,6 @@ export default {
       this.realNameIsInvalid= null;
       this.whatsappNumberIsValid= null;
       this.whatsappNumberIsInvalid= null;
-      this.charNameIsValid= null;
-      this.charNameIsInvalid= null;
       this.whitelistIsValid= null;
       this.whitelistIsInvalid= null;
       this.indicationWhitelistIsValid= null;
@@ -376,7 +346,6 @@ export default {
 
       //   this.emailState = null;
       //   this.realNameState = null;
-      //   this.charNameState = null;
       //   this.whitelistState = null;
       //   this.acceptTermsState = null;
     },
@@ -404,6 +373,8 @@ export default {
       //       console.log(error);
       //     });
       this.alertModal = true
+      
+      console.log(JSON.stringify(this.form))
       this.resetForm()
     },
     validateEmail(email) {
