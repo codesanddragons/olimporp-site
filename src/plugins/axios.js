@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import axios from 'axios'
 
-axios.defaults.baseURL = "http://localhost:3333"
+axios.defaults.baseURL = "http://localhost:3350"
 
 Vue.use({
     install(Vue){

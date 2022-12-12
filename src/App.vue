@@ -2,20 +2,18 @@
   <div id="app">
     <topMenu/>
     <!-- <videoBackground/> -->
-    <logoMain/>
+    <router-view/>
   </div>
 </template>
 
 <script>
 import topMenu from "./components/topMenu.vue";
-import logoMain from "./components/logoMain.vue"
 
 
 export default {
  
   components: {
-    topMenu,
-    logoMain
+    topMenu
   },
 };
 </script>

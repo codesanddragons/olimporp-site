@@ -30,15 +30,18 @@
     </b-collapse>
 
     <div>
+
       <b-modal
         v-model="alertModal"
-        title="Atenção"
+        title="ATENÇÃO"
         ok-only
         header-bg-variant="dark"
         header-text-variant="light"
         centered
       >
-        <p class="my-2">Clique no link de verificação enviado por e-mail para ativar a sua whitelist.</p>
+        <p class="my-2">
+          Enviamos por email o link para liberação de whitelist.
+        </p>
       </b-modal>
 
       <b-modal
@@ -161,13 +164,25 @@
 
         <template>
           <b-row id="footerModal">
-            <b-button
-              variant="success"
-              @click="formSubmit()"
-              class="footerModal-button"
+            <b-overlay
+              :show="busy"
+              rounded
+              opacity="0.6"
+              spinner-small
+              spinner-variant="primary"
+              class="d-inline-block"
+              @hidden="onHidden"
             >
-              Enviar
-            </b-button>
+              <b-button
+                variant="success"
+                :disabled="busy"
+                ref="button"
+                @click="formSubmit()"
+                class="footerModal-button"
+              >
+                Enviar
+              </b-button>
+            </b-overlay>
             <b-button
               variant="danger"
               @click="modalShow = false"
@@ -187,6 +202,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -194,7 +211,7 @@ export default {
         email: "",
         realName: "",
         whatsappNumber: "",
-        
+
         whitelist: "",
         indicationWhitelist: "",
         acceptNewsletters: false,
@@ -205,6 +222,8 @@ export default {
       showAlert: false,
       errorMessage: "",
       submitStatus: null,
+      busy: false,
+      activationCode: "",
 
       emailIsValid: null,
       emailIsInvalid: null,
@@ -217,8 +236,7 @@ export default {
       indicationWhitelistIsValid: null,
       indicationWhitelistIsInvalid: null,
       acceptTermsIsValid: null,
-      acceptTermsIsInvalid: null
-     
+      acceptTermsIsInvalid: null,
     };
   },
 
@@ -321,6 +339,8 @@ export default {
       this.acceptTermsIsInvalid = false;
       this.acceptTermsIsValid = true;
 
+      this.errorMessage = "";
+      this.showAlert = false;
       return true;
     },
     resetForm() {
@@ -331,18 +351,18 @@ export default {
       this.form.indicationWhitelist = "";
       this.form.acceptTerms = false;
       this.form.acceptNewsletters = false;
-      this.emailIsValid= null;
-      this.emailIsInvalid= null;
-      this.realNameIsValid= null;
-      this.realNameIsInvalid= null;
-      this.whatsappNumberIsValid= null;
-      this.whatsappNumberIsInvalid= null;
-      this.whitelistIsValid= null;
-      this.whitelistIsInvalid= null;
-      this.indicationWhitelistIsValid= null;
-      this.indicationWhitelistIsInvalid= null;
-      this.acceptTermsIsValid= null;
-      this.acceptTermsIsInvalid= null;
+      this.emailIsValid = null;
+      this.emailIsInvalid = null;
+      this.realNameIsValid = null;
+      this.realNameIsInvalid = null;
+      this.whatsappNumberIsValid = null;
+      this.whatsappNumberIsInvalid = null;
+      this.whitelistIsValid = null;
+      this.whitelistIsInvalid = null;
+      this.indicationWhitelistIsValid = null;
+      this.indicationWhitelistIsInvalid = null;
+      this.acceptTermsIsValid = null;
+      this.acceptTermsIsInvalid = null;
 
       //   this.emailState = null;
       //   this.realNameState = null;
@@ -350,32 +370,56 @@ export default {
       //   this.acceptTermsState = null;
     },
     formSubmit() {
+      this.busy = true
       //verificar se a wl existe na tabela e verificar se realmente não esta liberado
       //se ja estiver liberado enviar uma mensagem de erro
       //se nao estiver, salvar os campos preenchidos e enviar um link para o email que foi digitado
       //ao clicar no link de confirmação enviado por e-mail, a wl sera desbloqueada
 
       if (!this.checkFormValidity()) {
+        this.busy = false
         return;
       }
-      //   this.$http
-      //     .post("https://localhost:3333/wlControler", this.form)
-      //     .then(() => {
-      //       //carregando
-      //       console.log(this.form);
+      this.$http
+        .post("/customer/v1/preregistration", this.form)
+        .then((response) => {
+          
+          this.activationCode = response.data.uuid;
 
-      //       // Hide the modal manually
-      //       this.$nextTick(() => {
-      //         this.$bvModal.hide("modal-prevent-closing");
-      //       });
-      //     })
-      //     .catch((error) => {
-      //       console.log(error);
-      //     });
-      this.alertModal = true
-      
-      console.log(JSON.stringify(this.form))
-      this.resetForm()
+          axios
+            .post("http://localhost:3355/hermes/v1/send", {
+              name: this.form.realName,
+              email: this.form.email,
+              //activatedUrl: "https://olimporp.com.br/ativar/wl/"+this.activationCode,
+              activatedUrl: "http://localhost:8080/#/ativar/wl/"+this.activationCode,
+            })
+            .then(() => {
+              this.alertModal = true;
+              this.busy = false
+              // Hide the modal manually
+              //this.$nextTick(() => {
+              //  this.$bvModal.hide("modal-prevent-closing");
+              //});
+              this.resetForm();
+              console.log("email enviado");
+            })
+            .catch((error) => {
+              console.log(error);
+              this.errorMessage =
+                "Um erro inesperado aconteceu, tente novamente em alguns minutos. Se o error persistir, entre em contato com o suporte pelo discord.";
+              this.showAlert = true;
+              this.busy = false
+            });
+        })
+        .catch((error) => {
+          console.log(error);
+          this.errorMessage =
+            "Um erro inesperado aconteceu, tente novamente em alguns minutos. Se o error persistir, entre em contato com o suporte pelo discord.";
+          this.showAlert = true;
+          this.busy = false
+        });
+
+      //console.log(JSON.stringify(this.form))
     },
     validateEmail(email) {
       var re = /\S+@\S+\.\S+/;
@@ -383,6 +427,10 @@ export default {
     },
     isNumber(value) {
       return !isNaN(parseFloat(value)) && isFinite(value);
+    },
+    onHidden() {
+      // Return focus to the button once hidden
+      this.$refs.button.focus();
     },
   },
 };
