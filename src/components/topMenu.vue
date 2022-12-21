@@ -4,11 +4,11 @@
     <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
     <b-collapse id="nav-collapse" is-nav>
-      <b-navbar-nav>
+      <!-- <b-navbar-nav>
         <b-nav-item href="#" v-b-modal.modal-prevent-closing
           >WHITE LIST</b-nav-item
         >
-      </b-navbar-nav>
+      </b-navbar-nav> -->
 
       <!-- <b-navbar-nav>
         <b-nav-item href="#" right>
@@ -387,11 +387,11 @@ export default {
           this.activationCode = response.data.uuid;
 
           axios
-            .post("http://localhost:3355/hermes/v1/send", {
+            .post("http://177.54.147.108:3355/hermes/v1/send", {
               name: this.form.realName,
               email: this.form.email,
               //activatedUrl: "https://olimporp.com.br/ativar/wl/"+this.activationCode,
-              activatedUrl: "http://localhost:8080/#/ativar/wl/"+this.activationCode,
+              activatedUrl: "http://177.54.147.108:8080/#/ativar/wl/"+this.activationCode,
             })
             .then(() => {
               this.alertModal = true;

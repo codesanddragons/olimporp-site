@@ -18,7 +18,7 @@
             ></a>
           </li>
           <li>
-            <a href="#" title="instagram"
+            <a href="https://www.instagram.com/cidadeolimpo" title="instagram"
               ><b-icon icon="instagram" font-scale="1"></b-icon
             ></a>
           </li>
@@ -36,6 +36,10 @@
       </nav>
     </div>
   </div>
+
+
+
+
 </template>
 
 <script>

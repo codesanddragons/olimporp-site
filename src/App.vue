@@ -1,23 +1,29 @@
 <template>
   <div id="app">
-    <topMenu/>
+    <!-- eslint-disable -->
+  
+    <topMenu />
     <!-- <videoBackground/> -->
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <script>
 import topMenu from "./components/topMenu.vue";
 
-
 export default {
- 
-  components: {
-    topMenu
+  data() {
+   
   },
+
+  components: {
+    topMenu,
+  }
 };
 </script>
 
 <style>
-body { overflow-y: hidden; }
+body {
+  overflow-y: hidden;
+}
 </style>
