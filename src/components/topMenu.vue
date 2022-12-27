@@ -30,7 +30,6 @@
     </b-collapse>
 
     <div>
-
       <b-modal
         v-model="alertModal"
         title="ATENÇÃO"
@@ -202,8 +201,6 @@
 </template>
 
 <script>
-import axios from "axios";
-
 export default {
   data() {
     return {
@@ -370,32 +367,32 @@ export default {
       //   this.acceptTermsState = null;
     },
     formSubmit() {
-      this.busy = true
+      this.busy = true;
       //verificar se a wl existe na tabela e verificar se realmente não esta liberado
       //se ja estiver liberado enviar uma mensagem de erro
       //se nao estiver, salvar os campos preenchidos e enviar um link para o email que foi digitado
       //ao clicar no link de confirmação enviado por e-mail, a wl sera desbloqueada
 
       if (!this.checkFormValidity()) {
-        this.busy = false
+        this.busy = false;
         return;
       }
       this.$http
-        .post("/customer/v1/preregistration", this.form)
+        .post("/v1/preregistration", this.form)
         .then((response) => {
-          
           this.activationCode = response.data.uuid;
 
-          axios
-            .post("http://177.54.147.108:3355/hermes/v1/send", {
+          this.$http
+            .post("/v1/send", {
               name: this.form.realName,
               email: this.form.email,
               //activatedUrl: "https://olimporp.com.br/ativar/wl/"+this.activationCode,
-              activatedUrl: "http://177.54.147.108:8080/#/ativar/wl/"+this.activationCode,
+              activatedUrl:
+                "https://olimporp.com.br/#/ativar/wl/" + this.activationCode,
             })
             .then(() => {
               this.alertModal = true;
-              this.busy = false
+              this.busy = false;
               // Hide the modal manually
               //this.$nextTick(() => {
               //  this.$bvModal.hide("modal-prevent-closing");
@@ -408,7 +405,7 @@ export default {
               this.errorMessage =
                 "Um erro inesperado aconteceu, tente novamente em alguns minutos. Se o error persistir, entre em contato com o suporte pelo discord.";
               this.showAlert = true;
-              this.busy = false
+              this.busy = false;
             });
         })
         .catch((error) => {
@@ -416,7 +413,7 @@ export default {
           this.errorMessage =
             "Um erro inesperado aconteceu, tente novamente em alguns minutos. Se o error persistir, entre em contato com o suporte pelo discord.";
           this.showAlert = true;
-          this.busy = false
+          this.busy = false;
         });
 
       //console.log(JSON.stringify(this.form))

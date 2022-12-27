@@ -13,11 +13,11 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
-      axios
-        .put("http://localhost:3350/customer/v1/validate/" + vm.id)
+      this.$http
+        .put("v1/validate/" + vm.id)
         .then((response) => {
-          axios
-            .put("http://localhost:3360/integration/v1/activated/" + response.data.whitelist)
+          this.$http
+            .put("v1/activated/" + response.data.whitelist)
             .then(() => {
               vm.$router.push("/bemvindo");
             })

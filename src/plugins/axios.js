@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import axios from 'axios'
 
-axios.defaults.baseURL = "http://177.54.147.108:3350"
+axios.defaults.baseURL = "https://olimpo-customer-api.herokuapp.com/integration"
 
 Vue.use({
     install(Vue){
