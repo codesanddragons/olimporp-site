@@ -23,35 +23,13 @@
 </template>
 
 <script>
-import axios from "axios";
+
 export default {
   data() {
     return {
       id: this.$route.params.id,
     };
-  },
-  computed: {
-    customerIsCheck() {
-      return this.$store.getters.isCheckd
-    },
-  },
-  beforeRouteEnter(to, from, next) {
-    next((vm) => {
-      if (!this.customerIsCheck()) {
-        axios
-          .put("http://localhost:3350/customer/v1/validate/" + vm.id)
-          .then(() => {
-            
-            vm.$router.push("/bemvindo");
-          })
-          .catch((e) => {
-            console.log(e);
-            vm.$router.push("/");
-          });
-      } 
-      vm.$router.push("/bemvindo");
-    });
-  },
+  }
 };
 </script>
 
