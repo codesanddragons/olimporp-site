@@ -3,6 +3,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   data() {
     return {
@@ -11,11 +13,11 @@ export default {
   },
   beforeRouteEnter(to, from, next) {
     next((vm) => {
-      this.$http
-        .put("v1/validate/" + vm.id)
+      axios
+        .put("https://olimpo-customer-api.herokuapp.com/integration/v1/validate/" + vm.id)
         .then((response) => {
-          this.$http
-            .put("v1/activated/" + response.data.whitelist)
+          axios
+            .put("https://olimpo-customer-api.herokuapp.com/integration/v1/activated/" + response.data.whitelist)
             .then(() => {
               vm.$router.push("/bemvindo");
             })
